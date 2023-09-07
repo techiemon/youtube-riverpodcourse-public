@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/constants.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/image_upload/extensions/get_collection_name_from_file_type.dart';
 import 'package:testingriverpod/state/image_upload/typedefs/is_loading.dart';
 import 'package:testingriverpod/state/posts/models/post.dart';
@@ -20,50 +19,33 @@ class DeletePostStateNotifier extends StateNotifier<IsLoading> {
       isLoading = true;
 
       // delete the post's thumbnail
-
-      await FirebaseStorage.instance
-          .ref()
-          .child(post.userId)
-          .child(FirebaseCollectionName.thumbnails)
-          .child(post.thumbnailStorageId)
-          .delete();
+      await supabase.storage.from(SupabaseCollectionName.thumbnails).remove([
+        '${post.userId}/${post.thumbnailStorageId}',
+      ]);
 
       // delete the post's original file (video or image)
-
-      await FirebaseStorage.instance
-          .ref()
-          .child(post.userId)
-          .child(post.fileType.collectionName)
-          .child(post.originalFileStorageId)
-          .delete();
+      await supabase.storage.from(post.fileType.collectionName).remove([
+        '${post.userId}/${post.originalFileStorageId}',
+      ]);
 
       // delete all comments associated with this post
 
       await _deleteAllDocuments(
-        inCollection: FirebaseCollectionName.comments,
+        inCollection: SupabaseCollectionName.comments,
         postId: post.postId,
       );
 
       // delete all likes associated with this post
 
       await _deleteAllDocuments(
-        inCollection: FirebaseCollectionName.likes,
+        inCollection: SupabaseCollectionName.likes,
         postId: post.postId,
       );
 
       // finally delete the post itself
-
-      final postInCollection = await FirebaseFirestore.instance
-          .collection(FirebaseCollectionName.posts)
-          .where(
-            FieldPath.documentId,
-            isEqualTo: post.postId,
-          )
-          .limit(1)
-          .get();
-      for (final post in postInCollection.docs) {
-        await post.reference.delete();
-      }
+      await supabase.from(SupabaseCollectionName.posts).delete().match({
+        SupabaseFieldName.id: post.postId,
+      });
 
       return true;
     } catch (_) {
@@ -77,23 +59,11 @@ class DeletePostStateNotifier extends StateNotifier<IsLoading> {
     required PostId postId,
     required String inCollection,
   }) {
-    return FirebaseFirestore.instance.runTransaction(
-      maxAttempts: 3,
-      timeout: const Duration(
-        seconds: 20,
-      ),
-      (transaction) async {
-        final query = await FirebaseFirestore.instance
-            .collection(inCollection)
-            .where(
-              FirebaseFieldName.postId,
-              isEqualTo: postId,
-            )
-            .get();
-        for (final doc in query.docs) {
-          transaction.delete(doc.reference);
-        }
-      },
-    );
+    return supabase.from(inCollection).delete().match({
+      SupabaseFieldName.postId: postId,
+    });
+
+    // TODO: delete all comments associated with this post
+    // TODO: delete all likes files etc associated with this post
   }
 }

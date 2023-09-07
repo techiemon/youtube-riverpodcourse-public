@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/constants.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
 import 'package:testingriverpod/state/posts/models/post.dart';
 import 'package:testingriverpod/state/posts/typedefs/search_term.dart';
 
@@ -12,35 +11,21 @@ final postsBySearchTermProvider =
   (ref, SearchTerm searchTerm) {
     final controller = StreamController<Iterable<Post>>();
 
-    final sub = FirebaseFirestore.instance
-        .collection(
-          FirebaseCollectionName.posts,
-        )
-        .orderBy(
-          FirebaseFieldName.createdAt,
-          descending: true,
-        )
-        .snapshots()
-        .listen(
-      (snapshot) {
-        final posts = snapshot.docs
-            .map(
-              (doc) => Post(
-                json: doc.data(),
-                postId: doc.id,
-              ),
-            )
-            .where(
-              (post) => post.message.toLowerCase().contains(
-                    searchTerm.toLowerCase(),
-                  ),
+    final stream = supabase
+        .from(SupabaseCollectionName.posts)
+        .stream(primaryKey: ['id']).map((maps) {
+      final result = maps.map((map) => Post(postId: map['id'], json: map));
+
+      //TODO: Should be able to move this to the stream query as a greater than filter
+      final posts = result.where((post) {
+        return post.message.toLowerCase().contains(
+              searchTerm.toLowerCase(),
             );
-        controller.sink.add(posts);
-      },
-    );
+      });
+      controller.sink.add(posts);
+    });
 
     ref.onDispose(() {
-      sub.cancel();
       controller.close();
     });
 

@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:testingriverpod/constants.dart';
 import 'package:testingriverpod/state/comments/models/comment_payload.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
 import 'package:testingriverpod/state/image_upload/typedefs/is_loading.dart';
 import 'package:testingriverpod/state/posts/typedefs/post_id.dart';
 import 'package:testingriverpod/state/posts/typedefs/user_id.dart';
@@ -23,9 +23,8 @@ class SendCommentNotifier extends StateNotifier<IsLoading> {
       comment: comment,
     );
     try {
-      await FirebaseFirestore.instance
-          .collection(FirebaseCollectionName.comments)
-          .add(payload);
+      await supabase.from(SupabaseCollectionName.comments).insert(payload);
+
       return true;
     } catch (_) {
       return false;

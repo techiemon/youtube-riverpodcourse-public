@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:testingriverpod/constants.dart';
 import 'package:testingriverpod/state/comments/extensions/comment_sorting_by_request.dart';
 import 'package:testingriverpod/state/comments/models/comment.dart';
 import 'package:testingriverpod/state/comments/models/post_comments_request.dart';
 import 'package:testingriverpod/state/comments/models/post_with_comments.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/posts/models/post.dart';
 
 final specificPostWithCommentsProvider = StreamProvider.family
@@ -36,75 +36,38 @@ final specificPostWithCommentsProvider = StreamProvider.family
   }
 
   // watch changes to the post
-
-  final postSub = FirebaseFirestore.instance
-      .collection(
-        FirebaseCollectionName.posts,
-      )
-      .where(
-        FieldPath.documentId,
-        isEqualTo: request.postId,
-      )
+  final postsQuery = supabase
+      .from(SupabaseCollectionName.posts)
+      .stream(primaryKey: ['id'])
+      .eq(SupabaseFieldName.id, request.postId)
       .limit(1)
-      .snapshots()
-      .listen(
-    (snapshot) {
-      if (snapshot.docs.isEmpty) {
-        post = null;
-        comments = null;
+      .map((map) {
+        if (map.first['id'] == null) {
+          post = null;
+          comments = null;
+          notify();
+          return;
+        }
+        post = Post(
+          postId: map.first['id'],
+          json: map.first,
+        );
         notify();
-        return;
-      }
-      final doc = snapshot.docs.first;
-      if (doc.metadata.hasPendingWrites) {
-        return;
-      }
-      post = Post(
-        postId: doc.id,
-        json: doc.data(),
-      );
-      notify();
-    },
-  );
+      });
 
   // watch changes to the comments
-
-  final commentsQuery = FirebaseFirestore.instance
-      .collection(
-        FirebaseCollectionName.comments,
-      )
-      .where(
-        FirebaseFieldName.postId,
-        isEqualTo: request.postId,
-      )
-      .orderBy(
-        FirebaseFieldName.createdAt,
-        descending: true,
-      );
-
-  final limitedCommentsQuery = request.limit != null
-      ? commentsQuery.limit(request.limit!)
-      : commentsQuery;
-
-  final commentsSub = limitedCommentsQuery.snapshots().listen(
-    (snapshot) {
-      comments = snapshot.docs
-          .where(
-            (doc) => !doc.metadata.hasPendingWrites,
-          )
-          .map(
-            (doc) => Comment(
-              doc.data(),
-              id: doc.id,
-            ),
-          );
-      notify();
-    },
-  );
+  final stream = supabase
+      .from(SupabaseCollectionName.comments)
+      .stream(primaryKey: ['id'])
+      .eq(SupabaseFieldName.postId, request.postId)
+      .order(SupabaseFieldName.createdAt, ascending: false)
+      .limit(request.limit ?? 1000)
+      .map((maps) {
+        comments = maps.map((map) => Comment(id: map['id'], map));
+        notify();
+      });
 
   ref.onDispose(() {
-    postSub.cancel();
-    commentsSub.cancel();
     controller.close();
   });
 

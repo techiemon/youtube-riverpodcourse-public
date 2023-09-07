@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:testingriverpod/constants.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:testingriverpod/state/image_upload/models/file_type.dart';
 import 'package:testingriverpod/state/post_settings/models/post_setting.dart';

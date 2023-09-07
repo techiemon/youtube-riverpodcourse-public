@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/constants.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/posts/typedefs/user_id.dart';
 import 'package:testingriverpod/state/user_info/models/user_info_model.dart';
 
@@ -12,30 +12,21 @@ final userInfoModelProvider =
   (ref, UserId userId) {
     final controller = StreamController<UserInfoModel>();
 
-    final sub = FirebaseFirestore.instance
-        .collection(
-          FirebaseCollectionName.users,
-        )
-        .where(
-          FirebaseFieldName.userId,
-          isEqualTo: userId,
-        )
+    final stream = supabase
+        .from(SupabaseCollectionName.users)
+        .stream(primaryKey: ['id'])
+        .eq(SupabaseFieldName.userId, userId)
         .limit(1)
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.docs.isNotEmpty) {
-        final doc = snapshot.docs.first;
-        final json = doc.data();
-        final userInfoModel = UserInfoModel.fromJson(
-          json,
-          userId: userId,
-        );
-        controller.add(userInfoModel);
-      }
-    });
+        .map((map) {
+          final result = UserInfoModel(
+            userId: map.first['id'],
+            email: map.first['email'],
+            displayName: map.first['display_name'],
+          );
+          controller.sink.add(result);
+        });
 
     ref.onDispose(() {
-      sub.cancel();
       controller.close();
     });
 

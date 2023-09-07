@@ -64,6 +64,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.bargainblip.testingriverpod'
 }
 
 flutter {

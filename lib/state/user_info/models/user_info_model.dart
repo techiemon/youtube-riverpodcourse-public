@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart' show immutable;
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/posts/typedefs/user_id.dart';
 
 @immutable
@@ -16,9 +16,9 @@ class UserInfoModel extends MapView<String, String?> {
     required this.email,
   }) : super(
           {
-            FirebaseFieldName.userId: userId,
-            FirebaseFieldName.displayName: displayName,
-            FirebaseFieldName.email: email,
+            SupabaseFieldName.userId: userId,
+            SupabaseFieldName.displayName: displayName,
+            SupabaseFieldName.email: email,
           },
         );
 
@@ -27,8 +27,8 @@ class UserInfoModel extends MapView<String, String?> {
     required UserId userId,
   }) : this(
           userId: userId,
-          displayName: json[FirebaseFieldName.displayName] ?? '',
-          email: json[FirebaseFieldName.email],
+          displayName: json[SupabaseFieldName.displayName] ?? '',
+          email: json[SupabaseFieldName.email],
         );
 
   @override

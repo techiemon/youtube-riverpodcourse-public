@@ -1,7 +1,7 @@
 import 'dart:collection' show MapView;
 
 import 'package:flutter/foundation.dart' show immutable;
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/posts/typedefs/post_id.dart';
 import 'package:testingriverpod/state/posts/typedefs/user_id.dart';
 
@@ -13,9 +13,9 @@ class Like extends MapView<String, String> {
     required DateTime date,
   }) : super(
           {
-            FirebaseFieldName.postId: postId,
-            FirebaseFieldName.userId: likedBy,
-            FirebaseFieldName.date: date.toIso8601String(),
+            SupabaseFieldName.postId: postId,
+            SupabaseFieldName.userId: likedBy,
+            SupabaseFieldName.date: date.toIso8601String(),
           },
         );
 }

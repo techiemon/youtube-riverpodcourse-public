@@ -1,18 +1,26 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:testingriverpod/state/auth/providers/is_logged_in_provider.dart';
 
-import 'firebase_options.dart';
 import 'state/providers/is_loading_provider.dart';
 import 'views/components/loading/loading_screen.dart';
 import 'views/login/login_view.dart';
 import 'views/main/main_view.dart';
 
+class EnvironmentConfig {
+  static const supabaseUrl =
+      String.fromEnvironment('SUPABASE_URL', defaultValue: 'SUPABASE_URL');
+  static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANNON_KEY',
+      defaultValue: 'SUPABASE_ANNON_KEY');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+
+  await Supabase.initialize(
+    url: EnvironmentConfig.supabaseUrl,
+    anonKey: EnvironmentConfig.supabaseAnonKey,
   );
   runApp(
     const ProviderScope(

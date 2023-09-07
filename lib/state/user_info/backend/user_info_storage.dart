@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/constants.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/posts/typedefs/user_id.dart';
 import 'package:testingriverpod/state/user_info/models/user_info_payload.dart';
 
@@ -15,22 +15,22 @@ class UserInfoStorage {
   }) async {
     try {
       // first check if we have this user's info from before
-      final userInfo = await FirebaseFirestore.instance
-          .collection(
-            FirebaseCollectionName.users,
+      final userInfo = await supabase
+          .from(
+            SupabaseCollectionName.users,
           )
-          .where(
-            FirebaseFieldName.userId,
-            isEqualTo: userId,
-          )
-          .limit(1)
-          .get();
+          .select()
+          .match({
+        SupabaseFieldName.userId: userId,
+      }).single();
 
-      if (userInfo.docs.isNotEmpty) {
+      if (userInfo != null) {
         // we already have this user's profile, save the new data instead
-        await userInfo.docs.first.reference.update({
-          FirebaseFieldName.displayName: displayName,
-          FirebaseFieldName.email: email ?? '',
+        await supabase.from(SupabaseCollectionName.users).update({
+          SupabaseFieldName.displayName: displayName,
+          SupabaseFieldName.email: email ?? '',
+        }).match({
+          SupabaseFieldName.userId: userId,
         });
         return true;
       }
@@ -40,11 +40,11 @@ class UserInfoStorage {
         displayName: displayName,
         email: email,
       );
-      await FirebaseFirestore.instance
-          .collection(
-            FirebaseCollectionName.users,
+      await supabase
+          .from(
+            SupabaseCollectionName.users,
           )
-          .add(payload);
+          .insert(payload);
       return true;
     } catch (_) {
       return false;

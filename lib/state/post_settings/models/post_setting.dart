@@ -15,7 +15,7 @@ enum PostSetting {
   final String title;
   final String description;
 
-  // firebase storage key
+  // supabase storage key
   final String storageKey;
 
   const PostSetting({

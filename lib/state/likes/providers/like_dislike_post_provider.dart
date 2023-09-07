@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:testingriverpod/state/constants/firebase_collection_name.dart';
-import 'package:testingriverpod/state/constants/firebase_field_name.dart';
+import 'package:testingriverpod/constants.dart';
+import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
+import 'package:testingriverpod/state/constants/supabase_field_name.dart';
 import 'package:testingriverpod/state/likes/models/like.dart';
 import 'package:testingriverpod/state/likes/models/like_dislike_request.dart';
 
@@ -12,31 +12,22 @@ Future<bool> likeDislikePost(
   LikeDislikePostRef ref, {
   required LikeDislikeRequest request,
 }) async {
-  final query = FirebaseFirestore.instance
-      .collection(FirebaseCollectionName.likes)
-      .where(
-        FirebaseFieldName.postId,
-        isEqualTo: request.postId,
-      )
-      .where(
-        FirebaseFieldName.userId,
-        isEqualTo: request.likedBy,
-      )
-      .get();
+  final likeData =
+      await supabase.from(SupabaseCollectionName.likes).select().match({
+    SupabaseFieldName.postId: request.postId,
+    SupabaseFieldName.userId: request.likedBy
+  }).single();
 
-  // first see if the user has liked the post already or not
-  final hasLiked = await query.then(
-    (snapshot) => snapshot.docs.isNotEmpty,
-  );
+  final hasLiked = likeData != null;
 
   if (hasLiked) {
     // delete the like
     try {
-      await query.then((snapshot) async {
-        for (final doc in snapshot.docs) {
-          await doc.reference.delete();
-        }
+      await supabase.from(SupabaseCollectionName.likes).delete().match({
+        SupabaseFieldName.postId: request.postId,
+        SupabaseFieldName.userId: request.likedBy
       });
+
       return true;
     } catch (_) {
       return false;
@@ -50,9 +41,8 @@ Future<bool> likeDislikePost(
     );
 
     try {
-      await FirebaseFirestore.instance
-          .collection(FirebaseCollectionName.likes)
-          .add(like);
+      await supabase.from(SupabaseCollectionName.likes).insert(like);
+
       return true;
     } catch (_) {
       return false;
