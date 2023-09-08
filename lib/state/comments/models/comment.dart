@@ -13,7 +13,7 @@ class Comment {
   final PostId onPostId;
   Comment(Map<String, dynamic> json, {required this.id})
       : comment = json[SupabaseFieldName.comment],
-        createdAt = (json[SupabaseFieldName.createdAt] as Timestamp).toDate(),
+        createdAt = DateTime.parse(json[SupabaseFieldName.createdAt]),
         fromUserId = json[SupabaseFieldName.userId],
         onPostId = json[SupabaseFieldName.postId];
 

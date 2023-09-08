@@ -38,7 +38,7 @@ class LoginView extends ConsumerWidget {
                 Strings.logIntoYourAccount,
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle1
+                    .titleMedium
                     ?.copyWith(height: 1.5),
               ),
               const SizedBox(

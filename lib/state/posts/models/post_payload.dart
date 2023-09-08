@@ -1,6 +1,5 @@
 import 'dart:collection' show MapView;
 
-import 'package:cloud_firestore/cloud_firestore.dart' show FieldValue;
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:testingriverpod/state/image_upload/models/file_type.dart';
 import 'package:testingriverpod/state/post_settings/models/post_setting.dart';
@@ -24,7 +23,7 @@ class PostPayload extends MapView<String, dynamic> {
           {
             PostKey.userId: userId,
             PostKey.message: message,
-            PostKey.createdAt: FieldValue.serverTimestamp(),
+            PostKey.createdAt: DateTime.now(),
             PostKey.thumbnailUrl: thumbnailUrl,
             PostKey.fileUrl: fileUrl,
             PostKey.fileType: fileType.name,

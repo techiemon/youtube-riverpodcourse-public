@@ -44,7 +44,7 @@ dependencies:
   flutter_hooks: ^0.20.1
   collection: ^1.16.0
   intl: ^0.18.1
-  video_thumbnail: ^0.5.2
+  video_thumbnail: ^0.5.3
   video_player: ^2.4.7
   lottie: ^2.6.0
   share_plus: ^7.1.0

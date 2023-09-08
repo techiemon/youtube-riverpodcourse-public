@@ -1,4 +1,3 @@
-import 'package:testingriverpod/constants.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:testingriverpod/state/image_upload/models/file_type.dart';
 import 'package:testingriverpod/state/post_settings/models/post_setting.dart';
@@ -24,7 +23,7 @@ class Post {
     required Map<String, dynamic> json,
   })  : userId = json[PostKey.userId],
         message = json[PostKey.message],
-        createdAt = (json[PostKey.createdAt] as Timestamp).toDate(),
+        createdAt = DateTime.parse(json[PostKey.createdAt]),
         thumbnailUrl = json[PostKey.thumbnailUrl],
         fileUrl = json[PostKey.fileUrl],
         fileType = FileType.values.firstWhere(

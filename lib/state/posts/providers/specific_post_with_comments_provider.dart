@@ -36,7 +36,7 @@ final specificPostWithCommentsProvider = StreamProvider.family
   }
 
   // watch changes to the post
-  final postsQuery = supabase
+  final stream = supabase
       .from(SupabaseCollectionName.posts)
       .stream(primaryKey: ['id'])
       .eq(SupabaseFieldName.id, request.postId)
