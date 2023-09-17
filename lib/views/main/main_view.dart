@@ -9,6 +9,7 @@ import 'package:testingriverpod/views/components/dialogs/alert_dialog_model.dart
 import 'package:testingriverpod/views/components/dialogs/logout_dialog.dart';
 import 'package:testingriverpod/views/constants/strings.dart';
 import 'package:testingriverpod/views/create_new_post/create_new_post_view.dart';
+import 'package:testingriverpod/views/login/login_view.dart';
 import 'package:testingriverpod/views/tabs/home/home_view.dart';
 import 'package:testingriverpod/views/tabs/search/search_view.dart';
 import 'package:testingriverpod/views/tabs/user_posts/user_posts_view.dart';
@@ -99,6 +100,11 @@ class _MainViewState extends ConsumerState<MainView> {
                         );
                 if (shouldLogOut) {
                   await ref.read(authStateProvider.notifier).logOut();
+                  // Navigator.of(context).pushReplacementNamed('/');
+                  await Navigator.of(context, rootNavigator: true)
+                      .pushReplacement(MaterialPageRoute(
+                          builder: (context) =>
+                              const LoginView())); // TODO: move to a supabase auth watch
                 }
               },
               icon: const Icon(

@@ -9,10 +9,10 @@ final allPostsProvider = StreamProvider.autoDispose<Iterable<Post>>(
   (ref) {
     final controller = StreamController<Iterable<Post>>();
 
-    final stream = supabase
-        .from(SupabaseCollectionName.posts)
-        .stream(primaryKey: ['id']).map((maps) {
-      final result = maps.map((map) => Post(postId: map['id'], json: map));
+    supabase.from(SupabaseCollectionName.posts).stream(
+        primaryKey: ['post_id']).listen((List<Map<String, dynamic>> data) {
+      final result = data.map((e) => Post(postId: e['post_id'], json: e));
+      // final result = maps.map((map) => Post(postId: map['post_id'], json: map));
       controller.sink.add(result);
     });
 

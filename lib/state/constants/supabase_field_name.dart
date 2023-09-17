@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show immutable;
 
 @immutable
 class SupabaseFieldName {
-  static const userId = 'uid';
+  static const userId = 'user_id';
   static const postId = 'post_id';
   static const comment = 'comment';
   static const createdAt = 'created_at';

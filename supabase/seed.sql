@@ -156,156 +156,157 @@ CREATE POLICY "Enable read access for all users"
 
 
 -- Storage: storage.buckets
+-- TODO: these are broken, need to fix
 
-INSERT INTO storage.buckets(
-	id, name, public, avif_autodetection)
-	VALUES (1, 'images', true, false);
+-- INSERT INTO storage.buckets(
+-- 	id, name, public, avif_autodetection)
+-- 	VALUES (1, 'images', true, false);
 
-INSERT INTO storage.buckets(
-	id, name, public, avif_autodetection)
-	VALUES (2, 'videos', true, false);
+-- INSERT INTO storage.buckets(
+-- 	id, name, public, avif_autodetection)
+-- 	VALUES (2, 'videos', true, false);
 
-INSERT INTO storage.buckets(
-	id, name, public, avif_autodetection)
-	VALUES (3, 'thumbnails', true, false);
-
-
--- POLICY: images folder
--- POLICY: Give users delete access to own images folder
-
-DROP POLICY IF EXISTS "Give users delete access to own images folder" ON storage.objects;
-
-CREATE POLICY "Give users delete access to own images folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR DELETE
-    TO authenticated
-    USING (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
-
--- POLICY: Give users update access to own images folder
-
-DROP POLICY IF EXISTS " Give users update access to own images folder" ON storage.objects;
-
-CREATE POLICY " Give users update access to own images folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR UPDATE
-    TO authenticated
-    USING (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
-
--- POLICY: Give users insert access to own images folder
-
-DROP POLICY IF EXISTS "Give users insert access to own images folder" ON storage.objects;
-
-CREATE POLICY "Give users insert access to own images folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR INSERT
-    TO authenticated
-    WITH CHECK (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+-- INSERT INTO storage.buckets(
+-- 	id, name, public, avif_autodetection)
+-- 	VALUES (3, 'thumbnails', true, false);
 
 
--- POLICY: Give users select access to own images folder
+-- -- POLICY: images folder
+-- -- POLICY: Give users delete access to own images folder
 
-DROP POLICY IF EXISTS "Give users select access to own images folder" ON storage.objects;
+-- DROP POLICY IF EXISTS "Give users delete access to own images folder" ON storage.objects;
 
-CREATE POLICY "Give users select access to own images folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR SELECT
-    TO authenticated
-    USING (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+-- CREATE POLICY "Give users delete access to own images folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR DELETE
+--     TO authenticated
+--     USING (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
+-- -- POLICY: Give users update access to own images folder
 
--- POLICY: videos folder
--- POLICY: Give users delete access to own videos folder
+-- DROP POLICY IF EXISTS " Give users update access to own images folder" ON storage.objects;
 
-DROP POLICY IF EXISTS "Give users delete access to own videos folder" ON storage.objects;
+-- CREATE POLICY " Give users update access to own images folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR UPDATE
+--     TO authenticated
+--     USING (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
-CREATE POLICY "Give users delete access to own videos folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR DELETE
-    TO authenticated
-    USING (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+-- -- POLICY: Give users insert access to own images folder
 
--- POLICY: Give users update access to own videos folder
+-- DROP POLICY IF EXISTS "Give users insert access to own images folder" ON storage.objects;
 
-DROP POLICY IF EXISTS " Give users update access to own videos folder" ON storage.objects;
-
-CREATE POLICY " Give users update access to own videos folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR UPDATE
-    TO authenticated
-    USING (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
-
--- POLICY: Give users insert access to own videos folder
-
-DROP POLICY IF EXISTS "Give users insert access to own videos folder" ON storage.objects;
-
-CREATE POLICY "Give users insert access to own videos folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR INSERT
-    TO authenticated
-    WITH CHECK (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+-- CREATE POLICY "Give users insert access to own images folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR INSERT
+--     TO authenticated
+--     WITH CHECK (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
 
--- POLICY: Give users select access to own videos folder
+-- -- POLICY: Give users select access to own images folder
 
-DROP POLICY IF EXISTS "Give users select access to own videos folder" ON storage.objects;
+-- DROP POLICY IF EXISTS "Give users select access to own images folder" ON storage.objects;
 
-CREATE POLICY "Give users select access to own videos folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR SELECT
-    TO authenticated
-    USING (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
-
-
--- POLICY: thumbnails folder
--- POLICY: Give users delete access to own thumbnails folder
-
-DROP POLICY IF EXISTS "Give users delete access to own thumbnails folder" ON storage.objects;
-
-CREATE POLICY "Give users delete access to own thumbnails folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR DELETE
-    TO authenticated
-    USING (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
-
--- POLICY: Give users update access to own thumbnails folder
-
-DROP POLICY IF EXISTS " Give users update access to own thumbnails folder" ON storage.objects;
-
-CREATE POLICY " Give users update access to own thumbnails folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR UPDATE
-    TO authenticated
-    USING (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
-
--- POLICY: Give users insert access to own thumbnails folder
-
-DROP POLICY IF EXISTS "Give users insert access to own thumbnails folder" ON storage.objects;
-
-CREATE POLICY "Give users insert access to own thumbnails folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR INSERT
-    TO authenticated
-    WITH CHECK (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+-- CREATE POLICY "Give users select access to own images folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR SELECT
+--     TO authenticated
+--     USING (((bucket_id = 'images'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
 
--- POLICY: Give users select access to own thumbnails folder
+-- -- POLICY: videos folder
+-- -- POLICY: Give users delete access to own videos folder
 
-DROP POLICY IF EXISTS "Give users select access to own thumbnails folder" ON storage.objects;
+-- DROP POLICY IF EXISTS "Give users delete access to own videos folder" ON storage.objects;
 
-CREATE POLICY "Give users select access to own thumbnails folder"
-    ON storage.objects
-    AS PERMISSIVE
-    FOR SELECT
-    TO authenticated
-    USING (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+-- CREATE POLICY "Give users delete access to own videos folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR DELETE
+--     TO authenticated
+--     USING (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+-- -- POLICY: Give users update access to own videos folder
+
+-- DROP POLICY IF EXISTS " Give users update access to own videos folder" ON storage.objects;
+
+-- CREATE POLICY " Give users update access to own videos folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR UPDATE
+--     TO authenticated
+--     USING (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+-- -- POLICY: Give users insert access to own videos folder
+
+-- DROP POLICY IF EXISTS "Give users insert access to own videos folder" ON storage.objects;
+
+-- CREATE POLICY "Give users insert access to own videos folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR INSERT
+--     TO authenticated
+--     WITH CHECK (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+-- -- POLICY: Give users select access to own videos folder
+
+-- DROP POLICY IF EXISTS "Give users select access to own videos folder" ON storage.objects;
+
+-- CREATE POLICY "Give users select access to own videos folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR SELECT
+--     TO authenticated
+--     USING (((bucket_id = 'videos'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+-- -- POLICY: thumbnails folder
+-- -- POLICY: Give users delete access to own thumbnails folder
+
+-- DROP POLICY IF EXISTS "Give users delete access to own thumbnails folder" ON storage.objects;
+
+-- CREATE POLICY "Give users delete access to own thumbnails folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR DELETE
+--     TO authenticated
+--     USING (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+-- -- POLICY: Give users update access to own thumbnails folder
+
+-- DROP POLICY IF EXISTS " Give users update access to own thumbnails folder" ON storage.objects;
+
+-- CREATE POLICY " Give users update access to own thumbnails folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR UPDATE
+--     TO authenticated
+--     USING (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+-- -- POLICY: Give users insert access to own thumbnails folder
+
+-- DROP POLICY IF EXISTS "Give users insert access to own thumbnails folder" ON storage.objects;
+
+-- CREATE POLICY "Give users insert access to own thumbnails folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR INSERT
+--     TO authenticated
+--     WITH CHECK (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+-- -- POLICY: Give users select access to own thumbnails folder
+
+-- DROP POLICY IF EXISTS "Give users select access to own thumbnails folder" ON storage.objects;
+
+-- CREATE POLICY "Give users select access to own thumbnails folder"
+--     ON storage.objects
+--     AS PERMISSIVE
+--     FOR SELECT
+--     TO authenticated
+--     USING (((bucket_id = 'thumbnails'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));

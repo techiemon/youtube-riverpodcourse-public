@@ -25,29 +25,15 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     state = const AuthState.unknown();
   }
 
-  Future<void> loginWithGoogle() async {
+  Future<void> setSession(session) async {
     state = state.copiedWithIsLoading(true);
-    final result = await _authenticator.loginWithGoogle();
-    final userId = _authenticator.userId;
-    if (result == AuthResult.success && userId != null) {
-      await saveUserInfo(userId: userId);
-    }
-    state = AuthState(
-      result: result,
-      isLoading: false,
-      userId: _authenticator.userId,
-    );
-  }
 
-  Future<void> loginWithFacebook() async {
-    state = state.copiedWithIsLoading(true);
-    final result = await _authenticator.loginWithFacebook();
-    final userId = _authenticator.userId;
-    if (result == AuthResult.success && userId != null) {
+    final userId = session?.user?.id;
+    if (userId != null) {
       await saveUserInfo(userId: userId);
     }
     state = AuthState(
-      result: result,
+      result: AuthResult.success,
       isLoading: false,
       userId: _authenticator.userId,
     );

@@ -1,9 +1,11 @@
-import 'dart:io' show File;
+import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:testingriverpod/constants.dart';
 import 'package:testingriverpod/state/constants/supabase_collection_name.dart';
 import 'package:testingriverpod/state/image_upload/constants/constants.dart';
@@ -22,6 +24,13 @@ class ImageUploadNotifier extends StateNotifier<IsLoading> {
 
   set isLoading(bool value) => state = value;
 
+  Future<File> saveImageToTemp(Uint8List imageData, String fileName) async {
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/$fileName.jpg').create();
+    await file.writeAsBytes(imageData);
+    return file;
+  }
+
   Future<bool> upload({
     required File file,
     required FileType fileType,
@@ -32,63 +41,83 @@ class ImageUploadNotifier extends StateNotifier<IsLoading> {
     isLoading = true;
 
     late Uint8List thumbnailUint8List;
+    late img.Image thumbnailImage;
+    late File thumbnailFile;
+
+    final fileName = const Uuid().v4();
+    final fileExtension = file.path.split('/').last.split('.').last;
 
     switch (fileType) {
       case FileType.image:
+        final contents = file.readAsBytesSync();
         // create a thumbnail out of the file
-        final fileAsImage = img.decodeImage(file.readAsBytesSync());
+        final fileAsImage = img.decodeImage(contents);
+
         if (fileAsImage == null) {
           isLoading = false;
-          return false;
+          throw const CouldNotBuildThumbnailException();
         }
+
         // create thumbnail
-        final thumbnail = img.copyResize(
+        thumbnailImage = img.copyResize(
           fileAsImage,
           width: Constants.imageThumbnailWidth,
         );
-        final thumbnailData = img.encodeJpg(thumbnail);
-        thumbnailUint8List = Uint8List.fromList(thumbnailData);
+
+        final imageUint8List = img.encodeJpg(thumbnailImage);
+        // Create a temporary file to save the thumbnail
+        thumbnailFile = await saveImageToTemp(imageUint8List, 'thumbnail');
+        thumbnailUint8List = Uint8List.fromList(imageUint8List);
         break;
       case FileType.video:
-        final thumb = await VideoThumbnail.thumbnailData(
+        final thumbnailPath = await VideoThumbnail.thumbnailFile(
           video: file.path,
           imageFormat: ImageFormat.JPEG,
           maxHeight: Constants.videoThumbnailMaxHeight,
           quality: Constants.videoThumbnailQuality,
         );
-        if (thumb == null) {
+        if (thumbnailPath == null) {
           isLoading = false;
           throw const CouldNotBuildThumbnailException();
-        } else {
-          thumbnailUint8List = thumb;
         }
+
+        thumbnailFile = File(thumbnailPath);
+
+        thumbnailUint8List =
+            Uint8List.fromList(thumbnailFile.readAsBytesSync());
+        thumbnailImage = (img.decodeImage(thumbnailUint8List) ??
+            img.Image(width: 0, height: 0));
+
         break;
     }
 
+    if (thumbnailImage.height == 0 || thumbnailImage.width == 0) {
+      isLoading = false;
+      throw const CouldNotBuildThumbnailException();
+    }
+
     // calculate the aspect ratio
-
     final thumbnailAspectRatio = await thumbnailUint8List.getAspectRatio();
-
-    // calculate references
-
-    final fileName = const Uuid().v4();
 
     try {
       final String thumbnailRef = await supabase.storage
           .from(SupabaseCollectionName.thumbnails)
           .upload(
-            SupabaseCollectionName.thumbnails,
-            file,
+            '$fileName.$fileExtension',
+            thumbnailFile,
             fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
           );
 
       final String originalFileRef = await supabase.storage
           .from(fileType.collectionName)
           .upload(
-            SupabaseCollectionName.thumbnails,
+            '$fileName.$fileExtension',
             file,
             fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
           );
+
+      // delete the thumbnail file
+      thumbnailFile.delete();
 
       // upload the post itself
       final postPayload = PostPayload(
@@ -107,7 +136,8 @@ class ImageUploadNotifier extends StateNotifier<IsLoading> {
       );
       await supabase.from(SupabaseCollectionName.posts).insert(postPayload);
       return true;
-    } catch (_) {
+    } catch (e) {
+      print(e.toString());
       return false;
     } finally {
       isLoading = false;

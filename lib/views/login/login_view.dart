@@ -1,11 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:testingriverpod/constants.dart';
 import 'package:testingriverpod/state/auth/providers/auth_state_provider.dart';
-import 'package:testingriverpod/views/constants/app_colors.dart';
 import 'package:testingriverpod/views/constants/strings.dart';
 import 'package:testingriverpod/views/login/divider_with_margins.dart';
-import 'package:testingriverpod/views/login/facebook_button.dart';
-import 'package:testingriverpod/views/login/google_button.dart';
 import 'package:testingriverpod/views/login/login_view_signup_links.dart';
 
 class LoginView extends ConsumerWidget {
@@ -25,9 +25,7 @@ class LoginView extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(
-                height: 40,
-              ),
+              spacer,
               // header text
               Text(
                 Strings.welcomeToAppName,
@@ -41,28 +39,35 @@ class LoginView extends ConsumerWidget {
                     .titleMedium
                     ?.copyWith(height: 1.5),
               ),
-              const SizedBox(
-                height: 20,
+              spacer,
+              SupaSocialsAuth(
+                colored: true,
+                socialProviders: const [
+                  SocialProviders.facebook,
+                  SocialProviders.google,
+                ],
+                onSuccess: (session) {
+                  ref.read(authStateProvider.notifier).setSession(session);
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/home', (route) => false);
+                },
+                redirectUrl: kIsWeb
+                    ? null
+                    : 'io.supabase.youtube-supabase-riverpodcourse-public://login-callback',
               ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.loginButtonColor,
-                  foregroundColor: AppColors.loginButtonTextColor,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      fixedSize: const Size(100, 50)),
+                  icon: const Icon(Icons.email),
+                  onPressed: () {
+                    Navigator.popAndPushNamed(context, '/magic_link');
+                  },
+                  label: const Text('Sign in with Email Link'),
                 ),
-                onPressed:
-                    ref.read(authStateProvider.notifier).loginWithFacebook,
-                child: const FacebookButton(),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.loginButtonColor,
-                  foregroundColor: AppColors.loginButtonTextColor,
-                ),
-                onPressed: ref.read(authStateProvider.notifier).loginWithGoogle,
-                child: const GoogleButton(),
               ),
               const DividerWithMargins(),
               const LoginViewSignupLinks(),

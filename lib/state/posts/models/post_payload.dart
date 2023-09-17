@@ -23,7 +23,7 @@ class PostPayload extends MapView<String, dynamic> {
           {
             PostKey.userId: userId,
             PostKey.message: message,
-            PostKey.createdAt: DateTime.now(),
+            PostKey.createdAt: DateTime.now().toIso8601String(),
             PostKey.thumbnailUrl: thumbnailUrl,
             PostKey.fileUrl: fileUrl,
             PostKey.fileType: fileType.name,

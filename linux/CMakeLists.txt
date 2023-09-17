@@ -4,10 +4,10 @@ project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "youtube_riverpodcourse_public")
+set(BINARY_NAME "youtube-supabase-riverpodcourse-public")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.example.youtube_riverpodcourse_public")
+set(APPLICATION_ID "com.example.youtube_supabase_riverpodcourse_public")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
